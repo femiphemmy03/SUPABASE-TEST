@@ -8,9 +8,12 @@ const app = express();
 app.use(express.json());
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-   ssl: {
-    rejectUnauthorized: false},
+  host: "aws-1-eu-central-1.pooler.supabase.com",
+  port: 6543,
+  database: "postgres",
+  user: "postgres.vnxejtdbdqxwxnrcqqnw",
+  password: "@March3199108134808602", // raw password, no manual encoding needed here
+  ssl: { rejectUnauthorized: false },
 });
 
 // Basic health check — confirms Render is serving the app at all
