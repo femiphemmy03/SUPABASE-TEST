@@ -1,0 +1,52 @@
+const express = require("express");
+const { Pool } = require("pg");
+const jwt = require("jsonwebtoken");
+
+const app = express();
+app.use(express.json());
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
+
+// Basic health check — confirms Render is serving the app at all
+app.get("/", (req, res) => {
+  res.json({ status: "ok", message: "Server is running" });
+});
+
+// DB connectivity test — confirms Render can reach Supabase Postgres
+app.get("/db-test", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT NOW()");
+    res.json({ connected: true, time: result.rows[0].now });
+  } catch (err) {
+    res.status(500).json({ connected: false, error: err.message });
+  }
+});
+
+// JWT sanity check — confirms env vars load correctly
+app.get("/jwt-test", (req, res) => {
+  const token = jwt.sign({ test: true }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  });
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  res.json({ token, decoded });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+.env test:
+Supabse database password =march3199108134808602
+DATABASE_URL=postgresql://postgres.tqfmsveoljoqrjzljdzu:march3199108134808602@aws-1-us-east-2.pooler.supabase.com:5432/postgres?sslmode=require
+JWT_SECRET=97d980acd8c28527f83794deee88de9d615c054a009ad989fd41964a9dbe2fdff737a5639f76178751b91b61dd08e9833d8129ced99ebb235e8e9324611f6fdf
+JWT_EXPIRES_IN=7d
+
+
+# Supabase
+SUPABASE_URL=https://tqfmsveoljoqrjzljdzu.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxZm1zdmVvbGpvcXJqemxqZHp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzAwNjQsImV4cCI6MjA5Njg0NjA2NH0.N0ad2URUkpJ_-FATvoMFMPJZaiA_uB7QCvcRdAvl_js
+
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0ZXp3ZmhmcHNncWl1cW5ldXBvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTUyNzE1MSwiZXhwIjoyMDcxMTAzMTUxfQ.2EwSX0R018y5DDkHvCjEC6CXmE9apNlwjZ2o8gbzbTw
